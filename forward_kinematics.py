@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Union
-from numpy import array
-from pprint import pprint
+from numpy import array, pi
 from sympy import Symbol, sin, cos
 import yaml
 
@@ -37,6 +36,7 @@ def transform(
     x_rw: Union[float, Symbol] = Symbol('x_rw'),
     y_rw: Union[float, Symbol] = Symbol('y_rw'),
     z_rw: Union[float, Symbol] = Symbol('z_rw'),
+    **_
 ):
     """Forward transform function."""
     h_t = [
@@ -120,5 +120,11 @@ if __name__ == "__main__":
     with open("BZYXC_5_axis.yml", 'r') as f:
         data = yaml.load(f.read())
 
-    r_t = transform(**data)
-    pprint(r_t.tolist())
+    r_t = transform(
+        xm=82.250,
+        ym=0,
+        zm=-82.25,
+        theta_b=pi/2,
+        theta_c=-pi/2,
+        **data)
+    print(r_t)
