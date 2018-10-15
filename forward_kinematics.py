@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Union
-from numpy import array, ndarray
+from numpy import array, ndarray, pi
 from sympy import (
     Float,
     Expr,
@@ -48,6 +48,7 @@ def transform(
     x_rw: Union[float, Expr] = Symbol('x_rw'),
     y_rw: Union[float, Expr] = Symbol('y_rw'),
     z_rw: Union[float, Expr] = Symbol('z_rw'),
+    **_
 ) -> ndarray:
     """Forward transform function."""
     h_t = [
@@ -131,5 +132,12 @@ if __name__ == '__main__':
     with open("BZYXC_5_axis.yml", 'r') as f:
         data = yaml.load(f.read())
 
-    r_t = transform(**data)
+    r_t = transform(
+        xm=82.250,
+        ym=0,
+        zm=-82.25,
+        theta_b=pi / 2,
+        theta_c=-pi / 2,
+        **data
+    )
     print_matrix(r_t)
