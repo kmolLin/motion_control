@@ -1,43 +1,54 @@
 # -*- coding: utf-8 -*-
 
 from typing import Union
-from numpy import array
-from pprint import pprint
-from sympy import Symbol, sin, cos
+from numpy import array, ndarray
+from sympy import (
+    Float,
+    Expr,
+    Symbol,
+    sin,
+    cos,
+)
 import yaml
+
+
+def print_matrix(m: ndarray):
+    """Print a numpy matrix."""
+    for row in m:
+        print(", ".join((f"{v:.02f}" if type(v) == Float else f"{v}") for v in row))
 
 
 def transform(
     # h_t
-    z_ht: Union[float, Symbol] = Symbol('z_ht'),
+    z_ht: Union[float, Expr] = Symbol('z_ht'),
     # b_h
-    y_bh: Union[float, Symbol] = Symbol('y_bh'),
-    z_bh: Union[float, Symbol] = Symbol('z_bh'),
+    y_bh: Union[float, Expr] = Symbol('y_bh'),
+    z_bh: Union[float, Expr] = Symbol('z_bh'),
     # z_b
-    theta_b: Union[float, Symbol] = Symbol('theta_b'),
-    y_zb: Union[float, Symbol] = Symbol('y_zb'),
-    z_zb: Union[float, Symbol] = Symbol('z_zb'),
+    theta_b: Union[float, Expr] = Symbol('theta_b'),
+    y_zb: Union[float, Expr] = Symbol('y_zb'),
+    z_zb: Union[float, Expr] = Symbol('z_zb'),
     # f_z
-    y_fz: Union[float, Symbol] = Symbol('y_fz'),
-    z_fz: Union[float, Symbol] = Symbol('z_fz'),
-    zm: Union[float, Symbol] = Symbol('zm'),
+    y_fz: Union[float, Expr] = Symbol('y_fz'),
+    z_fz: Union[float, Expr] = Symbol('z_fz'),
+    zm: Union[float, Expr] = Symbol('zm'),
     # y_f
-    y_yf: Union[float, Symbol] = Symbol('y_yf'),
-    z_yf: Union[float, Symbol] = Symbol('z_yf'),
-    ym: Union[float, Symbol] = Symbol('ym'),
+    y_yf: Union[float, Expr] = Symbol('y_yf'),
+    z_yf: Union[float, Expr] = Symbol('z_yf'),
+    ym: Union[float, Expr] = Symbol('ym'),
     # x_y
-    z_xy: Union[float, Symbol] = Symbol('z_xy'),
-    xm: Union[float, Symbol] = Symbol('xm'),
+    z_xy: Union[float, Expr] = Symbol('z_xy'),
+    xm: Union[float, Expr] = Symbol('xm'),
     # c_x
-    theta_c: Union[float, Symbol] = Symbol('theta_c'),
-    z_cx: Union[float, Symbol] = Symbol('z_cx'),
+    theta_c: Union[float, Expr] = Symbol('theta_c'),
+    z_cx: Union[float, Expr] = Symbol('z_cx'),
     # w_c
-    z_wc: Union[float, Symbol] = Symbol('z_wc'),
+    z_wc: Union[float, Expr] = Symbol('z_wc'),
     # r_w
-    x_rw: Union[float, Symbol] = Symbol('x_rw'),
-    y_rw: Union[float, Symbol] = Symbol('y_rw'),
-    z_rw: Union[float, Symbol] = Symbol('z_rw'),
-):
+    x_rw: Union[float, Expr] = Symbol('x_rw'),
+    y_rw: Union[float, Expr] = Symbol('y_rw'),
+    z_rw: Union[float, Expr] = Symbol('z_rw'),
+) -> ndarray:
     """Forward transform function."""
     h_t = [
         [1, 0, 0, 0],
@@ -115,10 +126,10 @@ def transform(
     )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # mechanism data
     with open("BZYXC_5_axis.yml", 'r') as f:
         data = yaml.load(f.read())
 
     r_t = transform(**data)
-    pprint(r_t.tolist())
+    print_matrix(r_t)
