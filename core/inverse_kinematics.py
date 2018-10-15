@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Union
-import yaml
+
 from typing import Tuple
 from sympy import Symbol, acos, atan2, cos, sin
 
@@ -13,6 +13,7 @@ def inverse_transform(
     k_x: float,
     k_y: float,
     k_z: float,
+
     # h_t
     z_ht: Union[float, Symbol] = Symbol('z_ht'),
     # b_h
@@ -30,13 +31,15 @@ def inverse_transform(
     z_cx: Union[float, Symbol] = Symbol('z_cx'),
     **_
 ) -> Tuple[float, float, float, float, float]:
-    """ q_x: position x,
-        q_y: position y,
-        q_z: position z,
-        ## posture
-        k_x: vector of x,
-        k_y: vector of y,
-        k_z: vector of z,
+    """Parameters
+
+    q_x: position x
+    q_y: position y
+    q_z: position z
+
+    k_x: vector of x
+    k_y: vector of y
+    k_z: vector of z
     """
     z_bt = z_bh + z_ht
     z_rb = -z_rw - z_wc - z_cx - z_xy - z_yf + z_fz - z_zb
@@ -47,17 +50,3 @@ def inverse_transform(
     z_m = q_z + cos(theta_b) * z_bt - z_rb
 
     return x_m, y_m, z_m, theta_b, theta_c
-
-
-if __name__ == '__main__':
-    with open("BZYXC_5_axis.yml", 'r') as f:
-        data = yaml.load(f.read())
-    print(inverse_transform(
-        0,
-        0,
-        0,
-        -1,
-        0,
-        1,
-        **data
-    ))

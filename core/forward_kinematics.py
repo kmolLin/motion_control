@@ -1,46 +1,43 @@
 # -*- coding: utf-8 -*-
 
 from typing import Union
-from numpy import array, ndarray, pi
+from numpy import (
+    array,
+    ndarray,
+    float16 as np_float16,
+)
 from sympy import (
-    Float,
     Expr,
     Symbol,
     sin,
     cos,
 )
-import yaml
 
 
-def print_matrix(m: ndarray):
-    """Print a numpy matrix."""
-    for row in m:
-        print(", ".join((f"{v:.02f}" if type(v) == Float else f"{v}") for v in row))
+def forward_transform(
+    xm: float,
+    ym: float,
+    zm: float,
+    theta_b: float,
+    theta_c: float,
 
-
-def transform(
     # h_t
     z_ht: Union[float, Expr] = Symbol('z_ht'),
     # b_h
     y_bh: Union[float, Expr] = Symbol('y_bh'),
     z_bh: Union[float, Expr] = Symbol('z_bh'),
     # z_b
-    theta_b: Union[float, Expr] = Symbol('theta_b'),
     y_zb: Union[float, Expr] = Symbol('y_zb'),
     z_zb: Union[float, Expr] = Symbol('z_zb'),
     # f_z
     y_fz: Union[float, Expr] = Symbol('y_fz'),
     z_fz: Union[float, Expr] = Symbol('z_fz'),
-    zm: Union[float, Expr] = Symbol('zm'),
     # y_f
     y_yf: Union[float, Expr] = Symbol('y_yf'),
     z_yf: Union[float, Expr] = Symbol('z_yf'),
-    ym: Union[float, Expr] = Symbol('ym'),
     # x_y
     z_xy: Union[float, Expr] = Symbol('z_xy'),
-    xm: Union[float, Expr] = Symbol('xm'),
     # c_x
-    theta_c: Union[float, Expr] = Symbol('theta_c'),
     z_cx: Union[float, Expr] = Symbol('z_cx'),
     # w_c
     z_wc: Union[float, Expr] = Symbol('z_wc'),
@@ -50,7 +47,7 @@ def transform(
     z_rw: Union[float, Expr] = Symbol('z_rw'),
     **_
 ) -> ndarray:
-    """Forward transform function."""
+    """Forward forward_transform function."""
     h_t = [
         [1, 0, 0, 0],
         [0, 1, 0, 0],
@@ -115,29 +112,13 @@ def transform(
     ]
 
     return (
-        array(r_w)
-        .dot(array(w_c))
-        .dot(array(c_x))
-        .dot(array(x_y))
-        .dot(array(y_f))
-        .dot(array(f_z))
-        .dot(array(z_b))
-        .dot(array(b_h))
-        .dot(array(h_t))
+        array(r_w, dtype=np_float16)
+        .dot(array(w_c, dtype=np_float16))
+        .dot(array(c_x, dtype=np_float16))
+        .dot(array(x_y, dtype=np_float16))
+        .dot(array(y_f, dtype=np_float16))
+        .dot(array(f_z, dtype=np_float16))
+        .dot(array(z_b, dtype=np_float16))
+        .dot(array(b_h, dtype=np_float16))
+        .dot(array(h_t, dtype=np_float16))
     )
-
-
-if __name__ == '__main__':
-    # mechanism data
-    with open("BZYXC_5_axis.yml", 'r') as f:
-        data = yaml.load(f.read())
-
-    r_t = transform(
-        xm=82.250,
-        ym=0,
-        zm=-82.25,
-        theta_b=pi / 2,
-        theta_c=-pi / 2,
-        **data
-    )
-    print_matrix(r_t)
