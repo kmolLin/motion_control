@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from typing import Union
-from math import radians
 from numpy import array
 from pprint import pprint
 from sympy import Symbol, sin, cos
@@ -39,11 +38,7 @@ def transform(
     y_rw: Union[float, Symbol] = Symbol('y_rw'),
     z_rw: Union[float, Symbol] = Symbol('z_rw'),
 ):
-    if type(theta_b) == float:
-        theta_b = radians(theta_b)
-    if type(theta_c) == float:
-        theta_c = radians(theta_c)
-
+    """Forward transform function."""
     h_t = [
         [1, 0, 0, 0],
         [0, 1, 0, 0],
@@ -125,12 +120,5 @@ if __name__ == "__main__":
     with open("BZYXC_5_axis.yml", 'r') as f:
         data = yaml.load(f.read())
 
-    r_t = transform(
-        #xm=0,
-        #ym=0,
-        #zm=10,
-        #theta_b = 45,
-        #theta_c = 45,
-        #**data,
-    )
+    r_t = transform(**data)
     pprint(r_t.tolist())
