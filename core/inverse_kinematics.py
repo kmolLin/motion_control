@@ -3,7 +3,15 @@
 from typing import Union
 
 from typing import Tuple
-from sympy import Symbol, acos, atan2, cos, sin, atan
+from sympy import (
+    Expr,
+    Symbol,
+    acos,
+    atan2,
+    cos,
+    sin,
+)
+
 
 
 def inverse_transform(
@@ -15,20 +23,20 @@ def inverse_transform(
     k_z: float,
 
     # h_t
-    z_ht: Union[float, Symbol] = Symbol('z_ht'),
+    z_ht: Union[float, Expr] = Symbol('z_ht'),
     # b_h
-    z_bh: Union[float, Symbol] = Symbol('z_bh'),
+    z_bh: Union[float, Expr] = Symbol('z_bh'),
     # z_b
-    z_zb: Union[float, Symbol] = Symbol('z_zb'),
-    z_fz: Union[float, Symbol] = Symbol('z_fz'),
-    z_xy: Union[float, Symbol] = Symbol('z_xy'),
-    z_wc: Union[float, Symbol] = Symbol('z_wc'),
+    z_zb: Union[float, Expr] = Symbol('z_zb'),
+    z_fz: Union[float, Expr] = Symbol('z_fz'),
+    z_xy: Union[float, Expr] = Symbol('z_xy'),
+    z_wc: Union[float, Expr] = Symbol('z_wc'),
     # r_w
-    x_rw: Union[float, Symbol] = Symbol('x_rw'),
-    y_rw: Union[float, Symbol] = Symbol('y_rw'),
-    z_rw: Union[float, Symbol] = Symbol('z_rw'),
-    z_yf: Union[float, Symbol] = Symbol('z_xf'),
-    z_cx: Union[float, Symbol] = Symbol('z_cx'),
+    x_rw: Union[float, Expr] = Symbol('x_rw'),
+    y_rw: Union[float, Expr] = Symbol('y_rw'),
+    z_rw: Union[float, Expr] = Symbol('z_rw'),
+    z_yf: Union[float, Expr] = Symbol('z_xf'),
+    z_cx: Union[float, Expr] = Symbol('z_cx'),
     **_
 ) -> Tuple[float, float, float, float, float]:
     """Parameters
