@@ -14,5 +14,5 @@ if __name__ == '__main__':
     r_t = forward_transform(82.250, 0, -82.25, pi / 2, -pi / 2, **data)
     print_matrix(r_t)
 
-    result = inverse_transform(0., 0., 0., -1., 0., 1., **data)
+    result = inverse_transform(0., 0., 0., 0., 0., 1., **data)
     print(result)

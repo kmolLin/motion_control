@@ -3,7 +3,7 @@
 from typing import Union
 
 from typing import Tuple
-from sympy import Symbol, acos, atan2, cos, sin
+from sympy import Symbol, acos, atan2, cos, sin, atan
 
 
 def inverse_transform(
@@ -44,7 +44,10 @@ def inverse_transform(
     z_bt = z_bh + z_ht
     z_rb = -z_rw - z_wc - z_cx - z_xy - z_yf + z_fz - z_zb
     theta_b = acos(k_z)
-    theta_c = atan2(-k_y, k_x)
+    if k_y == 0.and k_x == 0.:
+        theta_c = atan(0.)
+    else:
+        theta_c = atan2(-k_y, k_x)
     x_m = cos(theta_c) * (q_x - x_rw) - sin(theta_c) * (q_y - y_rw) + sin(theta_b) * z_bt
     y_m = cos(theta_c) * (q_x - x_rw) + cos(theta_c) * (q_y - y_rw)
     z_m = q_z + cos(theta_b) * z_bt - z_rb
