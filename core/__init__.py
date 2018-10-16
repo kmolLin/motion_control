@@ -12,4 +12,4 @@ def print_matrix(m: Iterable[Any]):
                 s.append(f"{v:.02f}")
             except (ValueError, TypeError):
                 s.append(f"{v}")
-        print(",\t".join(s))
+        print(", \t".join(s))
