@@ -10,8 +10,8 @@ from sympy import (
     atan2,
     cos,
     sin,
+    atan,
 )
-
 
 
 def inverse_transform(
