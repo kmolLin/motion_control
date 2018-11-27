@@ -12,10 +12,14 @@ def nc_code_compiler(path: str):
         nc_doc = f.read().upper()
     
     command = []
-    for m in match(r"G(\d{1,2})\sX([+-]?\d+\.?\d*)\sY([+-]?\d+\.?\d*)", nc_doc):
-        command.append((
-            int(m.group(1)),
-            float(m.group(2)),
-            float(m.group(3)),
-        ))
+    for m in match(r"G(\d{1,2})\sX([+-]?\d+\.?\d*)\sY([+-]?\d+\.?\d*)(?:\sF(\d+\.?\d*))?", nc_doc):
+        g = int(m.group(1))
+        x = float(m.group(2))
+        y = float(m.group(3))
+        try:
+            f = float(m.group(4))
+        except TypeError:
+            command.append((g, x, y))
+        else:
+            command.append((g, x, y, f))
     print(command)
