@@ -1,0 +1,128 @@
+# -*- coding: utf-8 -*-
+
+from math import ceil, hypot, sqrt
+
+
+class Trapezoid:
+
+    __slots__ = (
+        'case', 't_c', 't_str',
+        '__l1', '__l2',
+        't0', 't1', 't2', 't3',
+        'v_max', 'a_max', 'j_max',
+    )
+
+    t_s = 1e-3
+    __a_max = 2500
+
+    def __init__(
+        self,
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+        feed_rate: float,
+        t0: float = 0.
+    ):
+        length = hypot(x2 - x1, y2 - y1)
+        n_c = 0
+
+        n_str = ceil(feed_rate / (self.__a_max * self.t_s))
+        t_str = n_str * self.t_s
+        l_min = feed_rate * t_str
+
+        if length <= l_min:
+            self.case = 0
+            n_str = ceil(sqrt(length / (self.__a_max * self.t_s * self.t_s)))
+            t_str = n_str * self.t_s
+            t_c = 0
+            v_cmd = length / t_str
+            # l_est = v_cmd * t_str
+        else:
+            self.case = 1
+            n_c = ceil((length - l_min) / (feed_rate * self.t_s))
+            t_c = n_c * self.t_s
+            v_cmd = length / (t_str + t_c)
+            # l_est = v_cmd * (t_str + t_c)
+
+        self.t_c = t_c
+        self.t_str = t_str
+
+        self.__l1 = 0.5 * v_cmd * t_str
+        self.__l2 = v_cmd * (t_str + t_c)
+
+        s1 = n_str
+        s2 = s1 + n_c
+        s3 = s2 + n_str
+        self.t0 = t0
+        self.t1 = t0 + s1 * self.t_s
+        self.t2 = t0 + s2 * self.t_s
+        self.t3 = t0 + s3 * self.t_s
+
+        self.v_max = v_cmd
+        self.a_max = v_cmd / t_str
+        self.j_max = self.a_max / self.t_s
+
+    def a(self, t: float) -> float:
+        if t == self.t0:
+            return 0.
+        elif self.t0 < t <= self.t1:
+            return self.a_max
+        elif self.t1 < t <= self.t2:
+            return 0.
+        elif self.t2 < t < self.t3:
+            return -self.a_max
+        elif t == self.t3:
+            return 0.
+
+        raise ValueError(f"time {t} is not in the range ({self.t0:.04f} ~ {self.t3:.04f})")
+
+    def v(self, t: float) -> float:
+        if self.t0 <= t < self.t1:
+            return self.a_max * (t - self.t0)
+        elif self.t1 <= t <= self.t2:
+            return self.v_max
+        elif self.t2 < t <= self.t3:
+            return self.a_max * (self.t3 - t)
+
+        raise ValueError(f"time {t} is not in the range ({self.t0:.04f} ~ {self.t3:.04f})")
+
+    def s(self, t: float) -> float:
+        if self.t0 <= t < self.t1:
+            dt = t - self.t0
+            return 0.5 * self.a_max * dt * dt
+        elif self.t1 <= t <= self.t2:
+            return self.__l1 + self.v_max * (t - self.t1)
+        elif self.t2 < t <= self.t3:
+            dt = self.t3 - t
+            return self.__l2 - 0.5 * self.a_max * dt * dt
+
+        raise ValueError(f"time {t} is not in the range ({self.t0:.04f} ~ {self.t3:.04f})")
+
+
+def _plot_tp(x1, y1, x2, y2, feed_rate):
+    tp = Trapezoid(x1, y1, x2, y2, feed_rate)
+    s_list = []
+    v_list = []
+    a_list = []
+    for i in range(int(tp.t3 / tp.t_s) + 1):
+        st = i * tp.t_s
+        s_list.append(tp.s(st))
+        v_list.append(tp.v(st))
+        a_list.append(tp.a(st))
+    pyplot.plot(range(len(s_list)), s_list)
+    pyplot.show()
+
+
+if __name__ == '__main__':
+    from core.nc import nc_code_compiler
+    from matplotlib import pyplot
+
+    command = nc_code_compiler("../line.nc")
+    ox = 0
+    oy = 0
+    for g, x, y, z, f in command:
+        if f:
+            _plot_tp(ox, oy, x, y, f)
+        ox = x
+        oy = y

@@ -27,14 +27,11 @@ def interpolation_2d(ox, oy, x, y, f):
         Tstr = N_start * sampling_time
         Tc = Nc * sampling_time
         V_cmd = length / Tstr
-        A_max = V_cmd / Tstr
         Lest = V_cmd * Tstr
-
     else:
         Nc = ceil((length - L_min) / (f * sampling_time))
         Tc = Nc * sampling_time
         V_cmd = length / (Tstr + Tc)
-        A_max = V_cmd / Tstr
         Lest = V_cmd * (Tstr + Tc)
 
     L1 = 0.5 * V_cmd * Tstr
@@ -48,11 +45,12 @@ def interpolation_2d(ox, oy, x, y, f):
     t3 = step3 * sampling_time
 
     f = V_cmd
-    a = A_max
-    j = A_max / sampling_time
+    a = V_cmd / Tstr
+    j = a / sampling_time
     s_tmp = []
     v_tmp = []
     acc_tmp = []
+    print(step3)
     for i in range(step3):
 
         t = i * sampling_time
@@ -60,7 +58,6 @@ def interpolation_2d(ox, oy, x, y, f):
             acc = a
             fed = acc * t
             pos = 0.5 * acc * t * t
-        # print(i)
 
         elif step1 <= i <= step2:
             acc = 0
@@ -82,16 +79,11 @@ def interpolation_2d(ox, oy, x, y, f):
 
 
 if __name__ == '__main__':
-    command = nc_code_compiler("D:/kmol/motion_control/line.nc")
+    command = nc_code_compiler("../line.nc")
     ox = 0
     oy = 0
     for g, x, y, z, f in command:
         if f:
             interpolation_2d(ox, oy, x, y, f)
-
         ox = x
         oy = y
-
-
-
-
