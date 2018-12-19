@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
 
-from math import ceil, hypot, sqrt
+from typing import Tuple
+from math import (
+    ceil,
+    sqrt,
+    hypot,
+    sin,
+    cos,
+    atan2,
+)
 
 
 class Trapezoid:
 
     __slots__ = (
-        'c_from', 'c_to',
+        'c_from', 'c_to', 'angle',
         'case', 't_c', 't_str',
         '__l1', '__l2',
         't0', 't1', 't2', 't3',
@@ -27,6 +35,7 @@ class Trapezoid:
     ):
         self.c_from = (x1, y1)
         self.c_to = (x2, y2)
+        self.angle = atan2(y2 - y1, x2 - x1)
         length = hypot(x2 - x1, y2 - y1)
         n_c = 0
 
@@ -90,23 +99,31 @@ class Trapezoid:
 
         raise ValueError(f"time {t} is not in the range ({self.t0:.04f} ~ {self.t3:.04f})")
 
-    def s(self, t: float) -> float:
+    def s(self, t: float, bs: float = 0.) -> float:
         if self.t0 <= t < self.t1:
             dt = t - self.t0
-            return 0.5 * self.a_max * dt * dt
+            return bs + 0.5 * self.a_max * dt * dt
         elif self.t1 <= t <= self.t2:
-            return self.__l1 + self.v_max * (t - self.t1)
+            return bs + self.__l1 + self.v_max * (t - self.t1)
         elif self.t2 < t <= self.t3:
             dt = self.t3 - t
-            return self.__l2 - 0.5 * self.a_max * dt * dt
+            return bs + self.__l2 - 0.5 * self.a_max * dt * dt
 
         raise ValueError(f"time {t} is not in the range ({self.t0:.04f} ~ {self.t3:.04f})")
+
+    def pos(self, t: float) -> Tuple[float, float]:
+        s = self.s(t)
+        bx, by = self.c_from
+        return (bx + s * cos(self.angle)), (by + s * sin(self.angle))
 
 
 if __name__ == '__main__':
     from core.nc import nc_reader
     from matplotlib import pyplot
 
+    bs = 0.
+    sx_plot = []
+    sy_plot = []
     s_plot = []
     v_plot = []
     a_plot = []
@@ -114,9 +131,13 @@ if __name__ == '__main__':
         tp = Trapezoid(ox, oy, x, y, of)
         for i in range(int(tp.t3 / tp.t_s) + 1):
             st = i * tp.t_s
-            s_plot.append(tp.s(st))
+            rx, ry = tp.pos(st)
+            sx_plot.append(rx)
+            sy_plot.append(ry)
+            s_plot.append(tp.s(st, bs))
             v_plot.append(tp.v(st))
             a_plot.append(tp.a(st))
+        bs = s_plot[-1]
 
-    pyplot.plot(list(i * 0.001 for i in range(len(s_plot))), s_plot)
+    pyplot.plot(list(i * 0.001 for i in range(len(v_plot))), v_plot)
     pyplot.show()

@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from typing import Iterator, Tuple
+from typing import (
+    Iterator,
+    Tuple,
+    Match,
+    AnyStr,
+)
 import re
 
 
-def match(patten: str, doc: str):
+def _match(patten: str, doc: str) -> Iterator[Match[AnyStr]]:
     yield from re.compile(patten).finditer(doc)
 
 
@@ -13,7 +18,7 @@ def _nc_compiler(path: str):
         nc_doc = f.read().upper()
 
     command = []
-    for m in match(
+    for m in _match(
         r"G(\d{1,2})\s"
         r"X([+-]?\d+\.?\d*)\s"
         r"Y([+-]?\d+\.?\d*)"
