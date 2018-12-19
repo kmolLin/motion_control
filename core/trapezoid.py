@@ -89,6 +89,10 @@ class Trapezoid:
 
         raise ValueError(f"time {t} is not in the range ({self.t0:.04f} ~ {self.t3:.04f})")
 
+    def a_xy(self, t: float) -> Tuple[float, float]:
+        a = self.a(t)
+        return (a * cos(self.angle)), (a * sin(self.angle))
+
     def v(self, t: float) -> float:
         if self.t0 <= t < self.t1:
             return self.a_max * (t - self.t0)
@@ -99,19 +103,23 @@ class Trapezoid:
 
         raise ValueError(f"time {t} is not in the range ({self.t0:.04f} ~ {self.t3:.04f})")
 
-    def s(self, t: float, bs: float = 0.) -> float:
+    def v_xy(self, t: float) -> Tuple[float, float]:
+        v = self.v(t)
+        return (v * cos(self.angle)), (v * sin(self.angle))
+
+    def s(self, t: float, s_base: float = 0.) -> float:
         if self.t0 <= t < self.t1:
             dt = t - self.t0
-            return bs + 0.5 * self.a_max * dt * dt
+            return s_base + 0.5 * self.a_max * dt * dt
         elif self.t1 <= t <= self.t2:
-            return bs + self.__l1 + self.v_max * (t - self.t1)
+            return s_base + self.__l1 + self.v_max * (t - self.t1)
         elif self.t2 < t <= self.t3:
             dt = self.t3 - t
-            return bs + self.__l2 - 0.5 * self.a_max * dt * dt
+            return s_base + self.__l2 - 0.5 * self.a_max * dt * dt
 
         raise ValueError(f"time {t} is not in the range ({self.t0:.04f} ~ {self.t3:.04f})")
 
-    def pos(self, t: float) -> Tuple[float, float]:
+    def s_xy(self, t: float) -> Tuple[float, float]:
         s = self.s(t)
         bx, by = self.c_from
         return (bx + s * cos(self.angle)), (by + s * sin(self.angle))
@@ -131,7 +139,7 @@ if __name__ == '__main__':
         tp = Trapezoid(ox, oy, x, y, of)
         for i in range(int(tp.t3 / tp.t_s) + 1):
             st = i * tp.t_s
-            rx, ry = tp.pos(st)
+            rx, ry = tp.s_xy(st)
             sx_plot.append(rx)
             sy_plot.append(ry)
             s_plot.append(tp.s(st, bs))
