@@ -6,6 +6,7 @@ from math import ceil, hypot, sqrt
 class Trapezoid:
 
     __slots__ = (
+        'c_from', 'c_to',
         'case', 't_c', 't_str',
         '__l1', '__l2',
         't0', 't1', 't2', 't3',
@@ -24,6 +25,8 @@ class Trapezoid:
         feed_rate: float,
         t0: float = 0.
     ):
+        self.c_from = (x1, y1)
+        self.c_to = (x2, y2)
         length = hypot(x2 - x1, y2 - y1)
         n_c = 0
 
@@ -100,29 +103,20 @@ class Trapezoid:
         raise ValueError(f"time {t} is not in the range ({self.t0:.04f} ~ {self.t3:.04f})")
 
 
-def _plot_tp(x1, y1, x2, y2, feed_rate):
-    tp = Trapezoid(x1, y1, x2, y2, feed_rate)
-    s_list = []
-    v_list = []
-    a_list = []
-    for i in range(int(tp.t3 / tp.t_s) + 1):
-        st = i * tp.t_s
-        s_list.append(tp.s(st))
-        v_list.append(tp.v(st))
-        a_list.append(tp.a(st))
-    pyplot.plot(range(len(s_list)), s_list)
-    pyplot.show()
-
-
 if __name__ == '__main__':
-    from core.nc import nc_code_compiler
+    from core.nc import nc_reader
     from matplotlib import pyplot
 
-    command = nc_code_compiler("../line.nc")
-    ox = 0
-    oy = 0
-    for g, x, y, z, f in command:
-        if f:
-            _plot_tp(ox, oy, x, y, f)
-        ox = x
-        oy = y
+    s_plot = []
+    v_plot = []
+    a_plot = []
+    for ox, oy, x, y, of in nc_reader("../line.nc"):
+        tp = Trapezoid(ox, oy, x, y, of)
+        for i in range(int(tp.t3 / tp.t_s) + 1):
+            st = i * tp.t_s
+            s_plot.append(tp.s(st))
+            v_plot.append(tp.v(st))
+            a_plot.append(tp.a(st))
+
+    pyplot.plot(list(i * 0.001 for i in range(len(s_plot))), s_plot)
+    pyplot.show()

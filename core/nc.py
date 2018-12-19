@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import Iterator, Tuple
 import re
 
 
@@ -7,10 +8,10 @@ def match(patten: str, doc: str):
     yield from re.compile(patten).finditer(doc)
 
 
-def nc_code_compiler(path: str):
+def _nc_compiler(path: str):
     with open(path, encoding='utf-8') as f:
         nc_doc = f.read().upper()
-    
+
     command = []
     for m in match(
         r"G(\d{1,2})\s"
@@ -37,26 +38,23 @@ def nc_code_compiler(path: str):
     return command
 
 
-def plot(
-    v_cmd: float,
-    a_max: float,
-    j_max: float,
-    t0: float,
-    t: float,
-    t1: float
-):
-    """Plot of s, v, a, j."""
-    s = v_cmd * t
-    v = v_cmd
+def nc_reader(path: str) -> Iterator[Tuple[float, float, float, float, float]]:
+    """Parser of NC code."""
+    command = _nc_compiler(path)
+    ox = 0.
+    oy = 0.
+    of = None
+    for g, x, y, z, f in command:
+        if of is None:
+            if f is None:
+                raise ValueError("no feed rate setting")
+            of = f
+        if ox == x and oy == y:
+            continue
 
-    if t == t0:
-        a = a_max
-        j = j_max
-    elif t == t1:
-        a = -a_max
-        j = -j_max
-    else:
-        a = 0
-        j = 0
+        yield ox, oy, x, y, of
 
-    return s, v, a, j
+        ox = x
+        oy = y
+        if f is not None:
+            of = f

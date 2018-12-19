@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from core.nc import nc_code_compiler
 from math import ceil, sqrt, hypot
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 sampling_time = 0.001
@@ -50,7 +48,6 @@ def interpolation_2d(ox, oy, x, y, f):
     s_tmp = []
     v_tmp = []
     acc_tmp = []
-    print(step3)
     for i in range(step3):
 
         t = i * sampling_time
@@ -73,17 +70,12 @@ def interpolation_2d(ox, oy, x, y, f):
         v_tmp.append(fed)
         acc_tmp.append(acc)
 
-    times = np.arange(0, len(s_tmp))
-    plt.plot(times * 0.001, s_tmp)
+    plt.plot(list(i * 0.001 for i in range(len(s_tmp))), s_tmp)
     plt.show()
 
 
 if __name__ == '__main__':
-    command = nc_code_compiler("../line.nc")
-    ox = 0
-    oy = 0
-    for g, x, y, z, f in command:
-        if f:
-            interpolation_2d(ox, oy, x, y, f)
-        ox = x
-        oy = y
+    from core.nc import nc_reader
+
+    for ox, oy, x, y, of in nc_reader("../line.nc"):
+        interpolation_2d(ox, oy, x, y, of)
