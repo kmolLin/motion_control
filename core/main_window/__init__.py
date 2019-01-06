@@ -124,3 +124,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         with open(self.file_name, 'w', encoding='utf-8') as f:
             f.write(self.nc_editor.text())
+
+    @pyqtSlot(name='on_nc_compile_clicked')
+    def __nc_compile(self):
+        """Compile NC code."""
