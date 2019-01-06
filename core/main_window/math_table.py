@@ -5,6 +5,7 @@ from pylab import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from core.QtModules import (
     Qt,
+    QAbstractItemView,
     QRect,
     QImage,
     QPixmap,
@@ -45,30 +46,29 @@ def _math_tex_to_qpixmap(math_tex: str, fs: int):
 
 class MathTableWidget(QTableWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, header_labels: Sequence[str], font_size: int, parent=None):
         super(MathTableWidget, self).__init__(parent)
-        self.setHorizontalHeader(_MathHeader(self))
-
-    def set_math_header_labels(self, header_labels: Sequence[str], font_size: int):
-        qpixmaps = []
-        index = 0
-        for label in header_labels:
-            qpixmaps.append(_math_tex_to_qpixmap(label, font_size))
-            self.setColumnWidth(index, qpixmaps[index].size().width() + 16)
-            index += 1
-
-        self.horizontalHeader().qpixmaps = qpixmaps
+        self.setColumnCount(len(header_labels))
+        self.setHorizontalHeader(_MathHeader(header_labels, font_size, self))
+        self.verticalHeader().setStretchLastSection(True)
         self.setHorizontalHeaderLabels(header_labels)
+        self.setAlternatingRowColors(True)
+        self.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
 
 
 class _MathHeader(QHeaderView):
 
-    def __init__(self, parent):
+    def __init__(self, header_labels: Sequence[str], font_size: int, parent):
         super(_MathHeader, self).__init__(Qt.Horizontal, parent)
-
         self.setSectionsClickable(True)
         self.setStretchLastSection(True)
+        self.setSectionResizeMode(QHeaderView.Stretch)
         self.pixmaps = []
+        index = 0
+        for label in header_labels:
+            self.pixmaps.append(_math_tex_to_qpixmap(label, font_size))
+            index += 1
 
     def paintSection(self, painter, rect, logical_index):
         if not rect.isValid():
@@ -88,13 +88,13 @@ class _MathHeader(QHeaderView):
         self.style().drawControl(QStyle.CE_Header, opt, painter, self)
         painter.restore()
 
-        qpixmap = self.pixmaps[logical_index]
+        pixmap = self.pixmaps[logical_index]
 
-        xpix = (rect.width() - qpixmap.size().width()) / 2. + rect.x()
-        ypix = (rect.height() - qpixmap.size().height()) / 2.
+        xpix = (rect.width() - pixmap.size().width()) / 2. + rect.x()
+        ypix = (rect.height() - pixmap.size().height()) / 2.
 
-        rect = QRect(xpix, ypix, qpixmap.size().width(), qpixmap.size().height())
-        painter.drawPixmap(rect, qpixmap)
+        rect = QRect(xpix, ypix, pixmap.size().width(), pixmap.size().height())
+        painter.drawPixmap(rect, pixmap)
 
     def sizeHint(self):
         base_size = QHeaderView.sizeHint(self)

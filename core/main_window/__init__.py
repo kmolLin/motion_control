@@ -3,11 +3,13 @@
 from typing import Sequence
 from core.nc import DEFAULT_NC_SYNTAX
 from core.QtModules import (
+    Qt,
     pyqtSlot,
     QStandardPaths,
     QMainWindow,
     QFileDialog,
     QFileInfo,
+    QDoubleSpinBox,
 )
 from .math_table import MathTableWidget
 from .text_edtor import NCEditor
@@ -21,6 +23,12 @@ def str_between(s: str, front: str, back: str) -> str:
     return s[(s.find(front) + 1):s.find(back)]
 
 
+def _spinbox(value: float) -> QDoubleSpinBox:
+    s = QDoubleSpinBox()
+    s.setValue(value)
+    return s
+
+
 class MainWindow(QMainWindow, Ui_MainWindow):
 
     """Main window of the program."""
@@ -30,19 +38,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.nc_editor = NCEditor(self)
         self.nc_code_layout.addWidget(self.nc_editor)
-        self.parameter_table = MathTableWidget(self)
-        self.parameter_table.verticalHeader().hide()
-        labels = [
+        self.parameter_table = MathTableWidget([
             r"$a$",
             r"$b$",
             r"$\zeta$",
             r"$\omega_n$",
-        ]
-        self.parameter_table.setColumnCount(len(labels))
-        self.parameter_table.set_math_header_labels(labels, 25)
+        ], 15, self)
+        self.parameter_table.verticalHeader().hide()
         self.parameter_table.setRowCount(1)
-        self.parameter_table.setAlternatingRowColors(True)
-        self.parameter_layout.addWidget(self.parameter_table)
+        self.parameter_table.setFixedHeight(60)
+        self.parameter_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.parameter_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        for i, v in enumerate([1., 20., 0.707, 1000.]):
+            self.parameter_table.setCellWidget(0, i, _spinbox(v))
+        self.parameter_layout.insertWidget(0, self.parameter_table)
 
         self.env = ""
         self.file_name = ""
