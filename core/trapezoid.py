@@ -38,8 +38,8 @@ class Velocity:
         y1: float,
         x2: float,
         y2: float,
-        s_base: float,
-        t0: float
+        t0: float,
+        s_base: float
     ):
         self.c_from = (x1, y1)
         self.c_to = (x2, y2)
@@ -69,7 +69,7 @@ class Velocity:
         return (v * cos(self.angle)), (v * sin(self.angle))
 
     def s_xy(self, t: float) -> Tuple[float, float]:
-        s = self.s(t)
+        s = self.s(t) - self.s_base
         bx, by = self.c_from
         return (bx + s * cos(self.angle)), (by + s * sin(self.angle))
 
@@ -195,4 +195,4 @@ def graph_chart(nc_doc: str, syntax: str = DEFAULT_NC_SYNTAX) -> Iterator[Trapez
         # X axis: [i * tp.t_s for i in range(len(plot))]
         tp = Trapezoid(ox, oy, x, y, of, s_base=bs)
         yield tp
-        bs = tp.s(int(tp.t3 / tp.t_s) * tp.t_s)
+        bs = tp.s(tp.t3)
