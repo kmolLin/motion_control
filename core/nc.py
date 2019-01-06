@@ -13,10 +13,7 @@ def _match(patten: str, doc: str) -> Iterator[Match[AnyStr]]:
     yield from re.compile(patten).finditer(doc)
 
 
-def _nc_compiler(path: str):
-    with open(path, encoding='utf-8') as f:
-        nc_doc = f.read().upper()
-
+def _nc_compiler(nc_doc: str):
     command = []
     for m in _match(
         r"G(\d{1,2})\s"
@@ -43,9 +40,9 @@ def _nc_compiler(path: str):
     return command
 
 
-def nc_reader(path: str) -> Iterator[Tuple[float, float, float, float, float]]:
+def nc_reader(nc_doc: str) -> Iterator[Tuple[float, float, float, float, float]]:
     """Parser of NC code."""
-    command = _nc_compiler(path)
+    command = _nc_compiler(nc_doc)
     ox = 0.
     oy = 0.
     of = None

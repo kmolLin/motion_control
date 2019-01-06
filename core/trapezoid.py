@@ -10,6 +10,8 @@ from math import (
     cos,
     atan2,
 )
+from matplotlib import pyplot
+from .nc import nc_reader
 
 
 class StepTimeError(ValueError):
@@ -160,17 +162,14 @@ class Trapezoid(Velocity):
         raise StepTimeError(t, self.t0, self.t3)
 
 
-if __name__ == '__main__':
-    from nc import nc_reader
-    from matplotlib import pyplot
-
+def graph_chart(nc_doc: str):
     bs = 0.
     sx_plot = []
     sy_plot = []
     s_plot = []
     v_plot = []
     a_plot = []
-    for ox, oy, x, y, of in nc_reader("../line.nc"):
+    for ox, oy, x, y, of in nc_reader(nc_doc):
         tp = Trapezoid(ox, oy, x, y, of)
         for i in range(int(tp.t3 / tp.t_s) + 1):
             st = i * tp.t_s
@@ -182,5 +181,5 @@ if __name__ == '__main__':
             a_plot.append(tp.a(st))
         bs = s_plot[-1]
 
-    pyplot.plot(list(i * 0.001 for i in range(len(v_plot))), v_plot)
+    pyplot.plot(list(i * 0.001 for i in range(len(sy_plot))), sy_plot)
     pyplot.show()
