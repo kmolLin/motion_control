@@ -76,15 +76,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """Set default file name."""
         self.file_name = new_name
 
-    @pyqtSlot(name='on_nc_load_button_clicked')
-    def __load_nc_code(self):
-        file_name = self.input_from("NC code", [
-            "Numerical Control programming language (*.nc)",
-            "Preparatory code (*.g)",
-        ])
-
-        if not file_name:
+    def dragEnterEvent(self, event):
+        """Drag file in to our window."""
+        mime_data = event.mimeData()
+        if not mime_data.hasUrls():
             return
+        for url in mime_data.urls():
+            suffix = QFileInfo(url.toLocalFile()).completeSuffix()
+            if suffix in {'nc', 'g'}:
+                event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        """Drop file in to our window."""
+        file_name = event.mimeData().urls()[-1].toLocalFile()
+        self.__load_nc_code(file_name)
+        event.acceptProposedAction()
+
+    @pyqtSlot(name='on_nc_load_button_clicked')
+    def __load_nc_code(self, file_name: str = ""):
+        if not file_name:
+            file_name = self.input_from("NC code", [
+                "Numerical Control programming language (*.nc)",
+                "Preparatory code (*.g)",
+            ])
+            if not file_name:
+                return
 
         self.nc_file_path.setText(file_name)
         with open(file_name, 'r', encoding='utf-8') as f:
@@ -98,7 +114,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 "Numerical control programming language (*.nc)",
                 "Preparatory code (*.g)",
             ])
-
             if not file_name:
                 return
 

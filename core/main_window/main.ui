@@ -10,6 +10,12 @@
     <height>600</height>
    </rect>
   </property>
+  <property name="mouseTracking">
+   <bool>true</bool>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>Motion control</string>
   </property>
@@ -50,6 +56,14 @@
             </property>
             <property name="shortcut">
              <string>Ctrl+S</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="nc_compile">
+            <property name="icon">
+             <iconset resource="../../icons.qrc">
+              <normaloff>:/icons/merge.png</normaloff>:/icons/merge.png</iconset>
             </property>
            </widget>
           </item>

@@ -4,5 +4,6 @@
     <file>icons/load_file.png</file>
     <file>icons/save_file.png</file>
     <file>icons/motor.png</file>
+    <file>icons/merge.png</file>
   </qresource>
 </RCC>
