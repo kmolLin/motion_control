@@ -11,8 +11,6 @@ __license__ = "AGPL"
 __email__ = "pyslvs@gmail.com"
 
 from typing import Tuple
-from abc import ABCMeta
-from PyQt5.sip import wrappertype
 from PyQt5.QtCore import (
     pyqtSignal,
     pyqtSlot,
@@ -104,6 +102,7 @@ from PyQt5.QtChart import (
     QScatterSeries,
     QValueAxis,
 )
+from PyQt5.Qsci import QsciScintilla
 from PyQt5.QtCore import qVersion, PYQT_VERSION_STR
 
 __all__ = [
@@ -193,7 +192,7 @@ __all__ = [
     'QVBoxLayout',
     'QWidget',
     'Qt',
-    'QAbcMeta',
+    'QsciScintilla',
 ]
 
 
@@ -208,17 +207,3 @@ qt_image_format: Tuple[str, ...] = (
     "X Bitmap (*.xbm)",
     "X Pixmap (*.xpm)",
 )
-
-
-class QAbcMeta(wrappertype, ABCMeta):
-    """Qt ABCMeta class.
-
-    Usage:
-
-    class MyQObject(QObject, metaclass=QAbcMeta):
-        @abstractmethod
-        def my_abstract_method(self):
-            ...
-
-    """
-    pass

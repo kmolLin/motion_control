@@ -37,6 +37,9 @@
              <iconset resource="../../icons.qrc">
               <normaloff>:/icons/load_file.png</normaloff>:/icons/load_file.png</iconset>
             </property>
+            <property name="shortcut">
+             <string>Ctrl+O</string>
+            </property>
            </widget>
           </item>
           <item>
@@ -44,6 +47,9 @@
             <property name="icon">
              <iconset resource="../../icons.qrc">
               <normaloff>:/icons/save_file.png</normaloff>:/icons/save_file.png</iconset>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+S</string>
             </property>
            </widget>
           </item>

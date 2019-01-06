@@ -69,6 +69,8 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Motion control"))
+        self.nc_load_button.setShortcut(_translate("MainWindow", "Ctrl+O"))
+        self.nc_save_button.setShortcut(_translate("MainWindow", "Ctrl+S"))
         self.chart_tab_widget.setTabText(self.chart_tab_widget.indexOf(self.tab), _translate("MainWindow", "Tab 1"))
         self.chart_tab_widget.setTabText(self.chart_tab_widget.indexOf(self.tab_2), _translate("MainWindow", "Tab 2"))
 
