@@ -19,7 +19,7 @@ DEFAULT_NC_SYNTAX = (
 
 
 def _match(patten: str, doc: str) -> Iterator[Match[AnyStr]]:
-    yield from re.compile(patten).finditer(doc)
+    yield from re.compile(patten.encode('utf-8')).finditer(doc.encode('utf-8'))
 
 
 def _nc_compiler(nc_doc: str, syntax: str):

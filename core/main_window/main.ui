@@ -82,26 +82,23 @@
        <layout class="QVBoxLayout" name="parameter_layout">
         <item>
          <widget class="QTabWidget" name="chart_tab_widget">
-          <property name="currentIndex">
-           <number>0</number>
-          </property>
-          <widget class="QWidget" name="pos_tab">
+          <widget class="QWidget" name="s_tab">
            <attribute name="title">
             <string>Position</string>
            </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_2"/>
+           <layout class="QVBoxLayout" name="s_layout"/>
           </widget>
-          <widget class="QWidget" name="velocity_tab">
+          <widget class="QWidget" name="v_tab">
            <attribute name="title">
             <string>Velocity</string>
            </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_3"/>
+           <layout class="QVBoxLayout" name="v_layout"/>
           </widget>
-          <widget class="QWidget" name="accelerate_tab">
+          <widget class="QWidget" name="a_tab">
            <attribute name="title">
             <string>Accelerate</string>
            </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_4"/>
+           <layout class="QVBoxLayout" name="a_layout"/>
           </widget>
          </widget>
         </item>

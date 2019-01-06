@@ -173,8 +173,8 @@ class Trapezoid(Velocity):
         raise StepTimeError(t, self.t0, self.t3)
 
     def iter(self, *funcs: Callable[[float], _T]) -> Iterator[Tuple[_T, ...]]:
-        for i in range(int(self.t3 / self.t_s) + 1):
-            yield tuple(func(i * self.t_s) for func in funcs)
+        for i in range(int((self.t3 - self.t0) / self.t_s) + 1):
+            yield tuple(func(self.t0 + i * self.t_s) for func in funcs)
 
 
 def graph_chart(nc_doc: str, syntax: str = DEFAULT_NC_SYNTAX) -> Iterator[Trapezoid]:
@@ -183,16 +183,16 @@ def graph_chart(nc_doc: str, syntax: str = DEFAULT_NC_SYNTAX) -> Iterator[Trapez
     Usage:
 
     s_plot: List[Tuple[float]] = []
-    for tp in graph_chart(nc_doc):
+    for tp in graph_chart(nc_doc, syntax):
         sxy_plot.extend(tp.iter(tp.s))
 
     sxy_plot: List[Tuple[float, float]] = []
-    for tp in graph_chart(nc_doc):
+    for tp in graph_chart(nc_doc, syntax):
         sxy_plot.extend(tp.iter(tp.s_xy))
     """
     bs = 0.
     for ox, oy, x, y, of in nc_reader(nc_doc, syntax):
-        # X axis: [i * 0.001 for i in range(len(sy_plot))]
+        # X axis: [i * tp.t_s for i in range(len(plot))]
         tp = Trapezoid(ox, oy, x, y, of, s_base=bs)
         yield tp
         bs = tp.s(int(tp.t3 / tp.t_s) * tp.t_s)

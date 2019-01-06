@@ -2,6 +2,7 @@
 
 from typing import Sequence
 from core.nc import DEFAULT_NC_SYNTAX
+from core.trapezoid import graph_chart
 from core.QtModules import (
     Qt,
     pyqtSlot,
@@ -10,6 +11,10 @@ from core.QtModules import (
     QFileDialog,
     QFileInfo,
     QDoubleSpinBox,
+    QChart,
+    QChartView,
+    QLineSeries,
+    QPainter,
 )
 from .math_table import MathTableWidget
 from .text_edtor import NCEditor
@@ -25,6 +30,7 @@ def str_between(s: str, front: str, back: str) -> str:
 
 def _spinbox(value: float) -> QDoubleSpinBox:
     s = QDoubleSpinBox()
+    s.setMaximum(10000)
     s.setValue(value)
     return s
 
@@ -59,6 +65,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Default RE compiler.
         self.re_compiler.setPlaceholderText(DEFAULT_NC_SYNTAX)
+
+        # Chart widgets.
+        self.charts = [QChart() for _ in range(6)]
+        for chart, layout in zip(self.charts, [self.s_layout, self.v_layout, self.a_layout] * 2):
+            chart.setTheme(QChart.ChartThemeDark)
+            chart.createDefaultAxes()
+            view = QChartView(chart)
+            view.setRenderHint(QPainter.Antialiasing)
+            layout.addWidget(view)
 
     def output_to(self, format_name: str, format_choose: Sequence[str]) -> str:
         """Simple to support multiple format."""
@@ -151,3 +166,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_nc_compile_clicked')
     def __nc_compile(self):
         """Compile NC code."""
+        # Clear all charts.
+        for chart in self.charts:
+            chart.removeAllSeries()
+            for axis in chart.axes():
+                chart.removeAxis(axis)
+
+        lines = []
+        for name in [
+            "Position",
+            "Velocity",
+            "Accelerate",
+            "XY Position",
+            "XY Velocity",
+            "XY Accelerate",
+        ]:
+            line = QLineSeries()
+            line.setName(name)
+            lines.append(line)
+        syntax = self.re_compiler.text() or self.re_compiler.placeholderText()
+        i = 0.
+        for tp in graph_chart(self.nc_editor.text(), syntax):
+            for s, v, a, (sx, sy), (vx, vy), (ax, ay) in tp.iter(tp.s, tp.v, tp.a, tp.s_xy, tp.v_xy, tp.a_xy):
+                lines[0].append(i, s)
+                lines[1].append(i, v)
+                lines[2].append(i, a)
+                lines[3].append(sx, sy)
+                lines[4].append(vx, vy)
+                lines[5].append(ax, ay)
+                i += tp.t_s
+        for line, chart in zip(lines, self.charts):
+            chart.addSeries(line)
+            chart.createDefaultAxes()
