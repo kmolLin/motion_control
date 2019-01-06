@@ -26,7 +26,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QSplitter" name="splitter">
+     <widget class="QSplitter" name="main_splitter">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -78,16 +78,35 @@
         </item>
        </layout>
       </widget>
-      <widget class="QTabWidget" name="chart_tab_widget">
-       <widget class="QWidget" name="tab">
-        <attribute name="title">
-         <string>Tab 1</string>
-        </attribute>
+      <widget class="QSplitter" name="right_splitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QWidget" name="verticalLayoutWidget_2">
+        <layout class="QVBoxLayout" name="parameter_layout"/>
        </widget>
-       <widget class="QWidget" name="tab_2">
-        <attribute name="title">
-         <string>Tab 2</string>
-        </attribute>
+       <widget class="QTabWidget" name="chart_tab_widget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="pos_tab">
+         <attribute name="title">
+          <string>Position</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_2"/>
+        </widget>
+        <widget class="QWidget" name="velocity_tab">
+         <attribute name="title">
+          <string>Velocity</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_3"/>
+        </widget>
+        <widget class="QWidget" name="accelerate_tab">
+         <attribute name="title">
+          <string>Accelerate</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_4"/>
+        </widget>
        </widget>
       </widget>
      </widget>

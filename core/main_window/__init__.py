@@ -9,6 +9,7 @@ from core.QtModules import (
     QFileDialog,
     QFileInfo,
 )
+from .math_table import MathTableWidget
 from .text_edtor import NCEditor
 from .Ui_main import Ui_MainWindow
 
@@ -29,6 +30,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.nc_editor = NCEditor(self)
         self.nc_code_layout.addWidget(self.nc_editor)
+        self.parameter_table = MathTableWidget(self)
+        self.parameter_table.verticalHeader().hide()
+        labels = [
+            r"$a$",
+            r"$b$",
+            r"$\zeta$",
+            r"$\omega_n$",
+        ]
+        self.parameter_table.setColumnCount(len(labels))
+        self.parameter_table.set_math_header_labels(labels, 25)
+        self.parameter_table.setRowCount(1)
+        self.parameter_table.setAlternatingRowColors(True)
+        self.parameter_layout.addWidget(self.parameter_table)
 
         self.env = ""
         self.file_name = ""

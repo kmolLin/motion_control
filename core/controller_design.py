@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from scipy.signal import TransferFunction, dlsim, dstep, step, cont2discrete
 import numpy as np
 import matplotlib.pyplot as plt
@@ -33,7 +34,7 @@ if __name__ == '__main__':
     num, den = model_system(a, b, zeta, wn)
     smaple_time = 0.01
     input_data = np.ones(300)
-    sysd = cont2discrete((model_system(a, b, zeta, wn)), method='bilinear', dt=smaple_time)
+    sysd = cont2discrete(model_system(a, b, zeta, wn), method='bilinear', dt=smaple_time)
     tout, yout = control_num_den(num, den, smaple_time, input_data)
     plt.plot(tout, yout)
     print(yout)
