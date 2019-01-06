@@ -57,7 +57,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.parameter_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         for i, v in enumerate([1., 20., 0.707, 1000.]):
             self.parameter_table.setCellWidget(0, i, _spinbox(v))
-        self.parameter_layout.insertWidget(0, self.parameter_table)
+        self.nc_code_layout.insertWidget(1, self.parameter_table)
 
         self.env = ""
         self.file_name = ""
@@ -69,8 +69,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Chart widgets.
         self.charts = [QChart() for _ in range(6)]
         for chart, layout in zip(self.charts, [self.s_layout, self.v_layout, self.a_layout] * 2):
-            chart.setTheme(QChart.ChartThemeDark)
-            chart.createDefaultAxes()
+            chart.setTheme(QChart.ChartThemeBlueIcy)
             view = QChartView(chart)
             view.setRenderHint(QPainter.Antialiasing)
             layout.addWidget(view)
@@ -166,26 +165,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSlot(name='on_nc_compile_clicked')
     def __nc_compile(self):
         """Compile NC code."""
-        # Clear all charts.
-        for chart in self.charts:
-            chart.removeAllSeries()
-            for axis in chart.axes():
-                chart.removeAxis(axis)
+        self.__clear_charts()
 
         lines = []
         for name in [
             "Position",
             "Velocity",
             "Accelerate",
-            "XY Position",
-            "XY Velocity",
-            "XY Accelerate",
+            "XY Position (mm)",
+            "XY Velocity (mm/s)",
+            "XY Accelerate (mm/s^2)",
         ]:
             line = QLineSeries()
             line.setName(name)
             lines.append(line)
-        syntax = self.re_compiler.text() or self.re_compiler.placeholderText()
+
         i = 0.
+        syntax = self.re_compiler.text() or self.re_compiler.placeholderText()
         for tp in graph_chart(self.nc_editor.text(), syntax):
             for s, v, a, (sx, sy), (vx, vy), (ax, ay) in tp.iter(tp.s, tp.v, tp.a, tp.s_xy, tp.v_xy, tp.a_xy):
                 lines[0].append(i, s)
@@ -197,4 +193,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 i += tp.t_s
         for line, chart in zip(lines, self.charts):
             chart.addSeries(line)
+        self.__reset_axis()
+
+    def __clear_charts(self):
+        """Clear all charts."""
+        for chart in self.charts:
+            chart.removeAllSeries()
+            for axis in chart.axes():
+                chart.removeAxis(axis)
+
+    def __reset_axis(self):
+        """Reset all axis of charts."""
+        for chart, x_axis, y_axis in zip(
+            self.charts,
+            ["Time (s)"] * 3 + ["X"] * 3,
+            ["Position (mm)", "Velocity (mm/s)", "Accelerate (mm/s^2)"] + ["Y"] * 3,
+        ):
             chart.createDefaultAxes()
+            chart.axisX().setTitleText(x_axis)
+            chart.axisY().setTitleText(y_axis)
