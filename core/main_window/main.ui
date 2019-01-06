@@ -59,6 +59,13 @@
             </property>
            </widget>
           </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="compiler_layout">
+          <item>
+           <widget class="QLineEdit" name="re_compiler"/>
+          </item>
           <item>
            <widget class="QPushButton" name="nc_compile">
             <property name="icon">

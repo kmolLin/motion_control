@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Tuple
+from typing import Tuple, List
 from abc import abstractmethod
 from math import (
     ceil,
@@ -10,7 +10,6 @@ from math import (
     cos,
     atan2,
 )
-from matplotlib import pyplot
 from .nc import nc_reader
 
 
@@ -162,7 +161,13 @@ class Trapezoid(Velocity):
         raise StepTimeError(t, self.t0, self.t3)
 
 
-def graph_chart(nc_doc: str):
+def graph_chart(nc_doc: str) -> Tuple[
+    List[float],
+    List[float],
+    List[float],
+    List[float],
+    List[float],
+]:
     bs = 0.
     sx_plot = []
     sy_plot = []
@@ -181,5 +186,5 @@ def graph_chart(nc_doc: str):
             a_plot.append(tp.a(st))
         bs = s_plot[-1]
 
-    pyplot.plot(list(i * 0.001 for i in range(len(sy_plot))), sy_plot)
-    pyplot.show()
+    # X axis: [i * 0.001 for i in range(len(sy_plot))]
+    return sx_plot, sy_plot, s_plot, v_plot, a_plot

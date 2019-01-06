@@ -9,8 +9,8 @@ from typing import (
 import re
 
 
-DEFAULT_SYNTAX = (
-    r"G(\d{1,2})\s"
+DEFAULT_NC_SYNTAX = (
+    r"(?:G(\d{1,2})\s)?"
     r"X([+-]?\d+\.?\d*)\s"
     r"Y([+-]?\d+\.?\d*)"
     r"(?:\sZ([+-]?\d+\.?\d*))?"
@@ -22,29 +22,34 @@ def _match(patten: str, doc: str) -> Iterator[Match[AnyStr]]:
     yield from re.compile(patten).finditer(doc)
 
 
-def _nc_compiler(nc_doc: str, syntax: str = DEFAULT_SYNTAX):
+def _nc_compiler(nc_doc: str, syntax: str):
     command = []
     for m in _match(syntax, nc_doc):
-        g = int(m.group(1))
+        if m.group(1) is not None:
+            g = int(m.group(1))
+        else:
+            g = 1
         x = float(m.group(2))
         y = float(m.group(3))
-        if m.group(4):
+        if m.group(4) is not None:
             z = float(m.group(4))
         else:
             z = None
-        if m.group(5):
+        if m.group(5) is not None:
             f = float(m.group(5)) / 60.
         else:
             f = None
-
         command.append((g, x, y, z, f))
 
     return command
 
 
-def nc_reader(nc_doc: str) -> Iterator[Tuple[float, float, float, float, float]]:
+def nc_reader(
+    nc_doc: str,
+    syntax: str = DEFAULT_NC_SYNTAX
+) -> Iterator[Tuple[float, float, float, float, float]]:
     """Parser of NC code."""
-    command = _nc_compiler(nc_doc)
+    command = _nc_compiler(nc_doc, syntax)
     ox = 0.
     oy = 0.
     of = None

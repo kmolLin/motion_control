@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from typing import Sequence
+from core.nc import DEFAULT_NC_SYNTAX
 from core.QtModules import (
     pyqtSlot,
-    QAction,
     QStandardPaths,
     QMainWindow,
     QFileDialog,
@@ -33,6 +33,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.env = ""
         self.file_name = ""
         self.set_locate(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation))
+
+        # Default RE compiler.
+        self.re_compiler.setPlaceholderText(DEFAULT_NC_SYNTAX)
 
     def output_to(self, format_name: str, format_choose: Sequence[str]) -> str:
         """Simple to support multiple format."""
