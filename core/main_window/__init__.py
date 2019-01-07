@@ -19,6 +19,7 @@ from core.QtModules import (
 from .math_table import MathTableWidget
 from .text_edtor import NCEditor
 from .Ui_main import Ui_MainWindow
+from core.controller_design import control_num_den, model_system
 
 __all__ = ['MainWindow']
 
@@ -69,7 +70,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Chart widgets.
         self.charts = [QChart() for _ in range(6)]
         for chart, layout in zip(self.charts, [self.s_layout, self.v_layout, self.a_layout] * 2):
-            chart.setTheme(QChart.ChartThemeBlueIcy)
+            chart.setTheme(QChart.ChartThemeLight)
             view = QChartView(chart)
             view.setRenderHint(QPainter.Antialiasing)
             layout.addWidget(view)
@@ -175,12 +176,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "XY Position (mm)",
             "XY Velocity (mm/s)",
             "XY Accelerate (mm/s^2)",
+            "XY Simulation Position (mm)"
         ]:
             line = QLineSeries()
             line.setName(name)
             lines.append(line)
 
         i = 0.
+        sx_plot = []
+        sy_plot = []
+        ts = None
         syntax = self.re_compiler.text() or self.re_compiler.placeholderText()
         for tp in graph_chart(self.nc_editor.text(), syntax):
             for s, v, a, (sx, sy), (vx, vy), (ax, ay) in tp.iter(tp.s, tp.v, tp.a, tp.s_xy, tp.v_xy, tp.a_xy):
@@ -190,10 +195,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 lines[3].append(sx, sy)
                 lines[4].append(vx, vy)
                 lines[5].append(ax, ay)
+                sx_plot.append(sx)
+                sy_plot.append(sy)
                 i += tp.t_s
-        for line, chart in zip(lines, self.charts):
+                if ts is None:
+                    ts = tp.t_s
+
+        for xout, yout in zip(*self.get_simulation_output(sx_plot, sy_plot, ts or 1e-3)):
+            lines[6].append(xout, yout)
+
+        for line, chart in zip(lines, self.charts + [self.charts[3]]):
             chart.addSeries(line)
         self.__reset_axis()
+
+    def get_simulation_output(self, sx_plot, sy_plot, t_s):
+        parameter = []
+        for c in range(self.parameter_table.columnCount()):
+            parameter.append(self.parameter_table.cellWidget(0, c).value())
+        num, den = model_system(*parameter)
+        tout, xout = control_num_den(num, den, t_s, sx_plot)
+        tout, yout = control_num_den(num, den, t_s, sy_plot)
+        return xout, yout
 
     def __clear_charts(self):
         """Clear all charts."""
