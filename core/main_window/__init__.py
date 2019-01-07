@@ -3,6 +3,7 @@
 from typing import Sequence
 from core.nc import DEFAULT_NC_SYNTAX
 from core.trapezoid import graph_chart
+from core.controller_design import control_num_den, model_system
 from core.QtModules import (
     Qt,
     pyqtSlot,
@@ -15,11 +16,12 @@ from core.QtModules import (
     QChartView,
     QLineSeries,
     QPainter,
+    QFont,
+    QLegend,
 )
 from .math_table import MathTableWidget
 from .text_edtor import NCEditor
 from .Ui_main import Ui_MainWindow
-from core.controller_design import control_num_den, model_system
 
 __all__ = ['MainWindow']
 
@@ -71,9 +73,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.charts = [QChart() for _ in range(6)]
         for chart, layout in zip(self.charts, [self.s_layout, self.v_layout, self.a_layout] * 2):
             chart.setTheme(QChart.ChartThemeLight)
+            legend: QLegend = chart.legend()
+            font: QFont = legend.font()
+            font.setPixelSize(15)
+            legend.setFont(font)
             view = QChartView(chart)
             view.setRenderHint(QPainter.Antialiasing)
             layout.addWidget(view)
+
+        # Splitter
+        self.main_splitter.setSizes([300, 500])
 
     def output_to(self, format_name: str, format_choose: Sequence[str]) -> str:
         """Simple to support multiple format."""
@@ -173,10 +182,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "Position",
             "Velocity",
             "Accelerate",
-            "XY Position (mm)",
-            "XY Velocity (mm/s)",
-            "XY Accelerate (mm/s^2)",
-            "XY Simulation Position (mm)"
+            "Original Position",
+            "X Velocity",
+            "Y Velocity",
+            "X Accelerate",
+            "Y Accelerate",
+            "Simulated Position"
         ]:
             line = QLineSeries()
             line.setName(name)
@@ -193,28 +204,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 lines[1].append(i, v)
                 lines[2].append(i, a)
                 lines[3].append(sx, sy)
-                lines[4].append(vx, vy)
-                lines[5].append(ax, ay)
+                lines[4].append(i, vx)
+                lines[5].append(i, vy)
+                lines[6].append(i, ax)
+                lines[7].append(i, ay)
                 sx_plot.append(sx)
                 sy_plot.append(sy)
                 i += tp.t_s
                 if ts is None:
                     ts = tp.t_s
 
-        for xout, yout in zip(*self.get_simulation_output(sx_plot, sy_plot, ts or 1e-3)):
-            lines[6].append(xout, yout)
+        for ssx, ssy in zip(*self.__simulation_output(sx_plot, sy_plot, ts or 1e-3)):
+            lines[-1].append(ssx, ssy)
 
-        for line, chart in zip(lines, self.charts + [self.charts[3]]):
+        for line, chart in zip(lines, [
+            self.charts[0],
+            self.charts[1],
+            self.charts[2],
+            self.charts[3],
+            self.charts[4],
+            self.charts[4],
+            self.charts[5],
+            self.charts[5],
+            self.charts[3],
+        ]):
             chart.addSeries(line)
         self.__reset_axis()
 
-    def get_simulation_output(self, sx_plot, sy_plot, t_s):
+    def __simulation_output(self, sx_plot, sy_plot, t_s):
         parameter = []
         for c in range(self.parameter_table.columnCount()):
             parameter.append(self.parameter_table.cellWidget(0, c).value())
         num, den = model_system(*parameter)
-        tout, xout = control_num_den(num, den, t_s, sx_plot)
-        tout, yout = control_num_den(num, den, t_s, sy_plot)
+        _, xout = control_num_den(num, den, t_s, sx_plot)
+        _, yout = control_num_den(num, den, t_s, sy_plot)
         return xout, yout
 
     def __clear_charts(self):
@@ -226,10 +249,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __reset_axis(self):
         """Reset all axis of charts."""
+        units = [" (mm)", " (mm/s)", " (mm/s^2)"]
+        y_label = ["Position", "Velocity", "Accelerate", "Y", "Velocity", "Accelerate"]
         for chart, x_axis, y_axis in zip(
             self.charts,
-            ["Time (s)"] * 3 + ["X"] * 3,
-            ["Position (mm)", "Velocity (mm/s)", "Accelerate (mm/s^2)"] + ["Y"] * 3,
+            ["Time (s)"] * 3 + ["X (mm)"] + ["Time (s)"] * 2,
+            map(lambda y, u: y + u, y_label, units * 2),
         ):
             chart.createDefaultAxes()
             chart.axisX().setTitleText(x_axis)
