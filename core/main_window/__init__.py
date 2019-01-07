@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from typing import Sequence
+from typing import Sequence, Callable
 from core.nc import DEFAULT_NC_SYNTAX
 from core.trapezoid import graph_chart
 from core.controller_design import control_num_den, model_system
 from core.QtModules import (
     Qt,
+    qt_image_format,
     pyqtSlot,
+    QApplication,
     QStandardPaths,
     QMainWindow,
     QFileDialog,
@@ -18,6 +20,10 @@ from core.QtModules import (
     QPainter,
     QFont,
     QLegend,
+    QPoint,
+    QMenu,
+    QAction,
+    QPixmap,
 )
 from .math_table import MathTableWidget
 from .text_edtor import NCEditor
@@ -78,8 +84,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             font.setPixelSize(15)
             legend.setFont(font)
             view = QChartView(chart)
+            view.setContextMenuPolicy(Qt.CustomContextMenu)
+            view.customContextMenuRequested.connect(self.__save_chart_func(view))
             view.setRenderHint(QPainter.Antialiasing)
             layout.addWidget(view)
+
+        # Chart menu
+        self.chart_menu = QMenu(self)
+        self.save_chart_action = QAction("Save as image", self)
+        self.chart_menu.addAction(self.save_chart_action)
+        self.copy_chart_action = QAction("Copy as pixmap", self)
+        self.chart_menu.addAction(self.copy_chart_action)
 
         # Splitter
         self.main_splitter.setSizes([300, 500])
@@ -171,6 +186,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         with open(self.file_name, 'w', encoding='utf-8') as f:
             f.write(self.nc_editor.text())
+
+    def __save_chart_func(self, chart: QChartView) -> Callable[[QPoint], None]:
+        """Save chart context menu."""
+
+        @pyqtSlot(QPoint)
+        def save_chart(pos: QPoint):
+            self.chart_menu.popup(chart.mapToGlobal(pos))
+            action = self.chart_menu.exec()
+            if action not in {self.save_chart_action, self.copy_chart_action}:
+                return
+
+            pixmap: QPixmap = chart.grab()
+            if action == self.copy_chart_action:
+                QApplication.clipboard().setPixmap(pixmap)
+                return
+
+            file_name = self.output_to("Image", qt_image_format)
+            if not file_name:
+                return
+
+            pixmap.save(file_name)
+
+        return save_chart
 
     @pyqtSlot(name='on_nc_compile_clicked')
     def __nc_compile(self):

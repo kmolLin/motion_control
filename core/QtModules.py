@@ -107,7 +107,7 @@ from PyQt5.QtChart import (
     QScatterSeries,
     QValueAxis,
 )
-from PyQt5.Qsci import QsciScintilla
+from PyQt5.Qsci import QsciScintilla, QSCINTILLA_VERSION_STR
 from PyQt5.QtCore import qVersion, PYQT_VERSION_STR
 
 __all__ = [
@@ -203,6 +203,7 @@ __all__ = [
     'QWidget',
     'Qt',
     'QsciScintilla',
+    'QSCINTILLA_VERSION_STR',
 ]
 
 
