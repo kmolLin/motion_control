@@ -10,21 +10,23 @@ import re
 
 
 DEFAULT_NC_SYNTAX = (
+    r"^"
     r"(?:G(\d{1,2})\s)?"
     r"X([+-]?\d+\.?\d*)\s"
     r"Y([+-]?\d+\.?\d*)"
     r"(?:\sZ([+-]?\d+\.?\d*))?"
     r"(?:\sF(\d+\.?\d*))?"
+    r"$"
 )
 
 
-def _match(patten: str, doc: str) -> Iterator[Match[AnyStr]]:
-    yield from re.compile(patten.encode('utf-8')).finditer(doc.encode('utf-8'))
+def _match(patten: AnyStr, doc: AnyStr) -> Iterator[Match[AnyStr]]:
+    yield from re.compile(patten, re.MULTILINE).finditer(doc)
 
 
 def _nc_compiler(nc_doc: str, syntax: str):
     command = []
-    for m in _match(syntax, nc_doc):
+    for m in _match(syntax.encode('utf-8'), nc_doc.encode('utf-8')):
         if m.group(1) is not None:
             g = int(m.group(1))
         else:
