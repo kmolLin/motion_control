@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from scipy.signal import TransferFunction, dlsim, dstep, step, cont2discrete
+from scipy.signal import dlsim, cont2discrete
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 def control_num_den(num, den, smapleing_time, input_data):
-
     # tf = TransferFunction(num, den, dt=smapleing_time)
     stsd = cont2discrete((num, den), method='bilinear', dt=smapleing_time)
     tout, yout = dlsim(stsd, u=input_data)
@@ -39,4 +38,3 @@ if __name__ == '__main__':
     plt.plot(tout, yout)
     print(yout)
     plt.show()
-
