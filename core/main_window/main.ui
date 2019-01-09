@@ -83,15 +83,15 @@
             <property name="text">
              <string>Trapezoid planning</string>
             </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="s_shape_option">
             <property name="text">
              <string>S Shape planning</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>

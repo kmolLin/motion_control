@@ -18,8 +18,6 @@ from core.QtModules import (
     QChartView,
     QLineSeries,
     QPainter,
-    QFont,
-    QLegend,
     QPoint,
     QMenu,
     QAction,
@@ -53,15 +51,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.nc_editor = NCEditor(self)
         self.nc_code_layout.addWidget(self.nc_editor)
+        h_size = 15
         self.parameter_table = MathTableWidget([
             r"$a$",
             r"$b$",
             r"$\zeta$",
             r"$\omega_n$",
-        ], 15, self)
+        ], h_size, self)
         self.parameter_table.verticalHeader().hide()
         self.parameter_table.setRowCount(1)
-        self.parameter_table.setFixedHeight(60)
+        self.parameter_table.setFixedHeight(h_size * 4)
         self.parameter_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.parameter_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         for i, v in enumerate([1., 20., 0.707, 1000.]):
@@ -79,10 +78,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.charts = [QChart() for _ in range(8)]
         for chart, layout in zip(self.charts, [self.s_layout, self.v_layout, self.a_layout, self.j_layout] * 2):
             chart.setTheme(QChart.ChartThemeLight)
-            legend: QLegend = chart.legend()
-            font: QFont = legend.font()
-            font.setPixelSize(15)
-            legend.setFont(font)
             view = QChartView(chart)
             view.setContextMenuPolicy(Qt.CustomContextMenu)
             view.customContextMenuRequested.connect(self.__save_chart_func(view))
@@ -222,12 +217,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "Accelerate",
             "Jerk",
             "Original Position",
-            "X Velocity",
-            "Y Velocity",
-            "X Accelerate",
-            "Y Accelerate",
-            "X Jerk",
-            "Y Jerk",
+            "Velocity of X",
+            "Velocity of Y",
+            "Accelerate of X",
+            "Accelerate of Y",
+            "Jerk of X",
+            "Jerk of Y",
             "Simulated Position",
         ]:
             line = QLineSeries()
@@ -314,7 +309,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         vaj = ["Velocity", "Accelerate", "Jerk"]
         for chart, x_axis, y_axis in zip(
             self.charts,
-            ["Time (s)"] * 3 + ["X (mm)"] + ["Time (s)"] * 4,
+            ["Time (s)"] * 4 + ["X (mm)"] + ["Time (s)"] * 3,
             map(lambda y, u: y + u, ["Position"] + vaj + ["Y"] + vaj, units * 2),
         ):
             chart.createDefaultAxes()
