@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+__author__ = "Yuan Chang"
+__copyright__ = "Copyright (C) 2019"
+__license__ = "AGPL"
+__email__ = "pyslvs@gmail.com"
+
 from sys import exit
 from .QtModules import (
     qVersion,

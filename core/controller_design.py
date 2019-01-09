@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+__author__ = "You-Sheng Lin"
+__copyright__ = "Copyright (C) 2019"
+__license__ = "AGPL"
+__email__ = "pyquino@gmail.com"
+
 from scipy.signal import dlsim, cont2discrete
 import numpy as np
 import matplotlib.pyplot as plt

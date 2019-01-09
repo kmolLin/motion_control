@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+__author__ = "Yuan Chang"
+__copyright__ = "Copyright (C) 2019"
+__license__ = "AGPL"
+__email__ = "pyslvs@gmail.com"
+
 from typing import Sequence, Callable
 from core.nc import DEFAULT_NC_SYNTAX
 from core.trapezoid import Trapezoid, SShape, graph_chart

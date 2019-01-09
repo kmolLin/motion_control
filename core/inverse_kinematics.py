@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+__author__ = "You-Sheng Lin"
+__copyright__ = "Copyright (C) 2019"
+__license__ = "AGPL"
+__email__ = "pyquino@gmail.com"
+
 from typing import Union
 
 from typing import Tuple
