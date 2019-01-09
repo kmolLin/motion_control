@@ -252,9 +252,8 @@ class SShape(Velocity):
         if self.length <= l_min:
             n_str = get_n_str(self.length)
             t_str = n_str * self.t_s
-            self.j_max = self.length / (2 * t_str ** 3)
+            self.j_max = self.length / (2 * t_str * t_str * t_str)
             self.a_max = self.j_max * t_str
-            t_c = 0
             v_cmd = self.a_max * t_str
         else:
             t_c = self.length / feed_rate - 2 * t_str
@@ -269,8 +268,19 @@ class SShape(Velocity):
             s += n
             self.t.append(s * self.t_s)
 
-        self.s_l.append(0.5 * v_cmd * t_str)
-        self.s_l.append(v_cmd * (t_str + t_c))
+        dt = self.t[1] - self.t[0]
+        self.s_l.append(self.j_max * dt * dt * dt / 6)
+        dt = self.t[2] - self.t[1]
+        t1_2 = self.t[1] * self.t[1]
+        t2_2 = self.t[2] * self.t[2]
+        self.s_l.append(self.s_l[-1] + v_cmd * dt - 0.5 * self.j_max * (
+            t2_2 * dt
+            - self.t[2] * (t2_2 - t1_2)
+            + (t2_2 * self.t[2] - t1_2 * self.t[1]) / 3
+        ))
+        self.s_l.append(self.s_l[-1] + v_cmd * (self.t[3] - self.t[2]))
+        dt = self.t[4] - self.t[3]
+        self.s_l.append(self.s_l[-1] + v_cmd * dt - (self.j_max * dt * dt * dt / 6))
 
         self.v_max = v_cmd
 
@@ -321,18 +331,30 @@ class SShape(Velocity):
     def s(self, t: float) -> float:
         if self.t[0] <= t < self.t[1]:
             dt = t - self.t[0]
-            return ...
+            return self.s_base + self.j_max * dt * dt * dt / 6
         elif self.t[1] <= t < self.t[2]:
-            dt = self.t[2] - t
-            return ...
+            dt = t - self.t[1]
+            t_2 = t * t
+            t1_2 = self.t[1] * self.t[1]
+            return self.s_base + self.s_l[0] + self.v_max * dt - 0.5 * self.j_max * (
+                self.t[2] * self.t[2] * dt
+                - self.t[2] * (t_2 - t1_2)
+                + (t_2 * t - t1_2 * self.t[1]) / 3
+            )
         elif self.t[2] <= t < self.t[3]:
-            return ...
+            return self.s_base + self.s_l[1] + self.v_max * (t - self.t[2])
         elif self.t[3] <= t < self.t[4]:
             dt = t - self.t[3]
-            return ...
+            return self.s_base + self.s_l[2] + self.v_max * dt - (self.j_max * dt * dt * dt / 6)
         elif self.t[4] <= t <= self.t[5]:
-            dt = self.t[5] - t
-            return ...
+            dt = t - self.t[4]
+            t_2 = t * t
+            t4_2 = self.t[4] * self.t[4]
+            return self.s_base + self.s_l[3] + 0.5 * self.j_max * (
+                self.t[5] * self.t[5] * dt
+                - self.t[5] * (t_2 - t4_2)
+                + (t_2 * t - t4_2 * self.t[4]) / 3
+            )
 
 
 def graph_chart(
