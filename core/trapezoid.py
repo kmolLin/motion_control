@@ -169,18 +169,18 @@ class Trapezoid(Velocity):
     def j(self, t: float) -> float:
         if t == self.t[0]:
             return self.j_max
-        elif self.t[0] < t <= self.t[1]:
+        elif self.t[0] < t < self.t[1]:
             return 0.
         elif t == self.t[1]:
             return -self.j_max
-        elif self.t[1] < t <= self.t[2]:
+        elif self.t[1] < t < self.t[2]:
             return 0.
         elif t == self.t[2]:
-            return self.j_max
+            return -self.j_max
         elif self.t[2] < t < self.t[3]:
             return 0.
         elif t == self.t[3]:
-            return -self.j_max
+            return self.j_max
 
     @in_time_range
     def a(self, t: float) -> float:

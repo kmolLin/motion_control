@@ -97,6 +97,12 @@
         </attribute>
         <layout class="QVBoxLayout" name="a_layout"/>
        </widget>
+       <widget class="QWidget" name="jerk_tab">
+        <attribute name="title">
+         <string>Jerk</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="j_layout"/>
+       </widget>
       </widget>
      </widget>
     </item>

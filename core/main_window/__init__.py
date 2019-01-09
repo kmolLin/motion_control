@@ -76,8 +76,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.re_compiler.setPlaceholderText(DEFAULT_NC_SYNTAX)
 
         # Chart widgets.
-        self.charts = [QChart() for _ in range(6)]
-        for chart, layout in zip(self.charts, [self.s_layout, self.v_layout, self.a_layout] * 2):
+        self.charts = [QChart() for _ in range(8)]
+        for chart, layout in zip(self.charts, [self.s_layout, self.v_layout, self.a_layout, self.j_layout] * 2):
             chart.setTheme(QChart.ChartThemeLight)
             legend: QLegend = chart.legend()
             font: QFont = legend.font()
@@ -220,12 +220,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "Position",
             "Velocity",
             "Accelerate",
+            "Jerk",
             "Original Position",
             "X Velocity",
             "Y Velocity",
             "X Accelerate",
             "Y Accelerate",
-            "Simulated Position"
+            "X Jerk",
+            "Y Jerk",
+            "Simulated Position",
         ]:
             line = QLineSeries()
             line.setName(name)
@@ -237,15 +240,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ts = None
         syntax = self.re_compiler.text() or self.re_compiler.placeholderText()
         for tp in graph_chart(self.nc_editor.text(), syntax, Trapezoid):
-            for s, v, a, (sx, sy), (vx, vy), (ax, ay) in tp.iter(tp.s, tp.v, tp.a, tp.s_xy, tp.v_xy, tp.a_xy):
+            for s, v, a, j, (sx, sy), (vx, vy), (ax, ay), (jx, jy) in tp.iter(
+                tp.s,
+                tp.v,
+                tp.a,
+                tp.j,
+                tp.s_xy,
+                tp.v_xy,
+                tp.a_xy,
+                tp.j_xy,
+            ):
                 lines[0].append(i, s)
                 lines[1].append(i, v)
                 lines[2].append(i, a)
-                lines[3].append(sx, sy)
-                lines[4].append(i, vx)
-                lines[5].append(i, vy)
-                lines[6].append(i, ax)
-                lines[7].append(i, ay)
+                lines[3].append(i, j)
+                lines[4].append(sx, sy)
+                lines[5].append(i, vx)
+                lines[6].append(i, vy)
+                lines[7].append(i, ax)
+                lines[8].append(i, ay)
+                lines[9].append(i, jx)
+                lines[10].append(i, jy)
                 sx_plot.append(sx)
                 sy_plot.append(sy)
                 i += tp.t_s
@@ -261,10 +276,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.charts[2],
             self.charts[3],
             self.charts[4],
+            self.charts[5],
+            self.charts[5],
+            self.charts[6],
+            self.charts[6],
+            self.charts[7],
+            self.charts[7],
             self.charts[4],
-            self.charts[5],
-            self.charts[5],
-            self.charts[3],
         ]):
             chart.addSeries(line)
         self.__reset_axis()
@@ -287,12 +305,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def __reset_axis(self):
         """Reset all axis of charts."""
-        units = [" (mm)", " (mm/s)", " (mm/s^2)"]
-        y_label = ["Position", "Velocity", "Accelerate", "Y", "Velocity", "Accelerate"]
+        units = [" (mm)", " (mm/s)", " (mm/s^2)", " (mm/s^3)"]
+        vaj = ["Velocity", "Accelerate", "Jerk"]
         for chart, x_axis, y_axis in zip(
             self.charts,
-            ["Time (s)"] * 3 + ["X (mm)"] + ["Time (s)"] * 2,
-            map(lambda y, u: y + u, y_label, units * 2),
+            ["Time (s)"] * 3 + ["X (mm)"] + ["Time (s)"] * 4,
+            map(lambda y, u: y + u, ["Position"] + vaj + ["Y"] + vaj, units * 2),
         ):
             chart.createDefaultAxes()
             chart.axisX().setTitleText(x_axis)

@@ -76,6 +76,11 @@ class Ui_MainWindow(object):
         self.a_layout = QtWidgets.QVBoxLayout(self.a_tab)
         self.a_layout.setObjectName("a_layout")
         self.chart_tab_widget.addTab(self.a_tab, "")
+        self.jerk_tab = QtWidgets.QWidget()
+        self.jerk_tab.setObjectName("jerk_tab")
+        self.j_layout = QtWidgets.QVBoxLayout(self.jerk_tab)
+        self.j_layout.setObjectName("j_layout")
+        self.chart_tab_widget.addTab(self.jerk_tab, "")
         self.verticalLayout.addWidget(self.main_splitter)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -97,5 +102,6 @@ class Ui_MainWindow(object):
         self.chart_tab_widget.setTabText(self.chart_tab_widget.indexOf(self.s_tab), _translate("MainWindow", "Position"))
         self.chart_tab_widget.setTabText(self.chart_tab_widget.indexOf(self.v_tab), _translate("MainWindow", "Velocity"))
         self.chart_tab_widget.setTabText(self.chart_tab_widget.indexOf(self.a_tab), _translate("MainWindow", "Accelerate"))
+        self.chart_tab_widget.setTabText(self.chart_tab_widget.indexOf(self.jerk_tab), _translate("MainWindow", "Jerk"))
 
 import icons_rc
