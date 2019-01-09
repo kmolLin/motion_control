@@ -2,7 +2,7 @@
 
 from typing import Sequence, Callable
 from core.nc import DEFAULT_NC_SYNTAX
-from core.trapezoid import graph_chart, Trapezoid
+from core.trapezoid import Trapezoid, SShape, graph_chart
 from core.controller_design import control_num_den, model_system
 from core.QtModules import (
     Qt,
@@ -234,12 +234,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             line.setName(name)
             lines.append(line)
 
+        syntax = self.re_compiler.text() or self.re_compiler.placeholderText()
+        if self.trapezoid_option.isChecked():
+            strategy = Trapezoid
+        else:
+            strategy = SShape
+
         i = 0.
         sx_plot = []
         sy_plot = []
         ts = None
-        syntax = self.re_compiler.text() or self.re_compiler.placeholderText()
-        for tp in graph_chart(self.nc_editor.text(), syntax, Trapezoid):
+        for tp in graph_chart(self.nc_editor.text(), syntax, strategy):
             for s, v, a, j, (sx, sy), (vx, vy), (ax, ay), (jx, jy) in tp.iter(
                 tp.s,
                 tp.v,

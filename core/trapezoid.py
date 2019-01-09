@@ -28,7 +28,7 @@ class StepTimeError(ValueError):
         )
 
 
-def in_time_range(
+def _in_time_range(
     func: Callable[['Velocity', float], Optional[float]]
 ) -> Callable[['Velocity', float], float]:
     """A decorator used to avoid the function to return none."""
@@ -47,7 +47,7 @@ _T_back = TypeVar('_T_back')
 
 class Velocity:
 
-    __slots__ = ('length', 'c_from', 'c_to', 'angle', 's_base', 't')
+    __slots__ = ('length', 'c_from', 'c_to', 'angle', 's_base', 't', 's_l')
 
     t_s = 1e-3
     default_a_max = 2500
@@ -69,6 +69,7 @@ class Velocity:
         self.length = hypot(x2 - x1, y2 - y1)
         self.s_base = s_base
         self.t = [t0]
+        self.s_l = []
 
     @abstractmethod
     def j(self, t: float) -> float:
@@ -115,8 +116,7 @@ class Trapezoid(Velocity):
     __slots__ = (
         'c_from', 'c_to', 'length', 'angle',
         'case', 't_c', 't_str',
-        '__l1', '__l2',
-        's_base', 't',
+        's_l', 's_base', 't',
         'v_max', 'a_max', 'j_max',
     )
 
@@ -153,8 +153,8 @@ class Trapezoid(Velocity):
         self.t_c = t_c
         self.t_str = t_str
 
-        self.__l1 = 0.5 * v_cmd * t_str
-        self.__l2 = v_cmd * (t_str + t_c)
+        self.s_l.append(0.5 * v_cmd * t_str)
+        self.s_l.append(v_cmd * (t_str + t_c))
 
         s = 0.
         for n in [n_str, n_c, n_str]:
@@ -165,7 +165,7 @@ class Trapezoid(Velocity):
         self.a_max = v_cmd / t_str
         self.j_max = self.a_max / self.t_s
 
-    @in_time_range
+    @_in_time_range
     def j(self, t: float) -> float:
         if t == self.t[0]:
             return self.j_max
@@ -182,7 +182,7 @@ class Trapezoid(Velocity):
         elif t == self.t[3]:
             return self.j_max
 
-    @in_time_range
+    @_in_time_range
     def a(self, t: float) -> float:
         if t == self.t[0]:
             return 0.
@@ -195,7 +195,7 @@ class Trapezoid(Velocity):
         elif t == self.t[3]:
             return 0.
 
-    @in_time_range
+    @_in_time_range
     def v(self, t: float) -> float:
         if self.t[0] <= t < self.t[1]:
             return self.a_max * (t - self.t[0])
@@ -204,16 +204,16 @@ class Trapezoid(Velocity):
         elif self.t[2] < t <= self.t[3]:
             return self.a_max * (self.t[3] - t)
 
-    @in_time_range
+    @_in_time_range
     def s(self, t: float) -> float:
         if self.t[0] <= t < self.t[1]:
             dt = t - self.t[0]
             return self.s_base + 0.5 * self.a_max * dt * dt
         elif self.t[1] <= t <= self.t[2]:
-            return self.s_base + self.__l1 + self.v_max * (t - self.t[1])
+            return self.s_base + self.s_l[0] + self.v_max * (t - self.t[1])
         elif self.t[2] < t <= self.t[3]:
             dt = self.t[3] - t
-            return self.s_base + self.__l2 - 0.5 * self.a_max * dt * dt
+            return self.s_base + self.s_l[1] - 0.5 * self.a_max * dt * dt
 
 
 class SShape(Velocity):
@@ -223,8 +223,7 @@ class SShape(Velocity):
     __slots__ = (
         'c_from', 'c_to', 'length', 'angle',
         'case', 't_c', 't_str',
-        '__l1', '__l2',
-        's_base', 't',
+        's_l', 's_base', 't',
         'v_max', 'a_max', 'j_max',
     )
 
@@ -255,6 +254,7 @@ class SShape(Velocity):
             t_str = n_str * self.t_s
             self.j_max = self.length / (2 * t_str ** 3)
             self.a_max = self.j_max * t_str
+            t_c = 0
             v_cmd = self.a_max * t_str
         else:
             t_c = self.length / feed_rate - 2 * t_str
@@ -269,9 +269,12 @@ class SShape(Velocity):
             s += n
             self.t.append(s * self.t_s)
 
+        self.s_l.append(0.5 * v_cmd * t_str)
+        self.s_l.append(v_cmd * (t_str + t_c))
+
         self.v_max = v_cmd
 
-    @in_time_range
+    @_in_time_range
     def j(self, t: float) -> float:
         if self.t[0] <= t < self.t[1]:
             return self.j_max
@@ -284,7 +287,7 @@ class SShape(Velocity):
         elif self.t[4] <= t <= self.t[5]:
             return self.j_max
 
-    @in_time_range
+    @_in_time_range
     def a(self, t: float) -> float:
         if self.t[0] <= t < self.t[1]:
             return self.j_max * (t - self.t[0])
@@ -297,7 +300,7 @@ class SShape(Velocity):
         elif self.t[4] <= t <= self.t[5]:
             return -self.j_max * (self.t[5] - t)
 
-    @in_time_range
+    @_in_time_range
     def v(self, t: float) -> float:
         if self.t[0] <= t < self.t[1]:
             dt = t - self.t[0]
@@ -314,10 +317,22 @@ class SShape(Velocity):
             dt = self.t[5] - t
             return 0.5 * self.j_max * dt * dt
 
-    @in_time_range
+    @_in_time_range
     def s(self, t: float) -> float:
-        # TODO: Position
-        ...
+        if self.t[0] <= t < self.t[1]:
+            dt = t - self.t[0]
+            return ...
+        elif self.t[1] <= t < self.t[2]:
+            dt = self.t[2] - t
+            return ...
+        elif self.t[2] <= t < self.t[3]:
+            return ...
+        elif self.t[3] <= t < self.t[4]:
+            dt = t - self.t[3]
+            return ...
+        elif self.t[4] <= t <= self.t[5]:
+            dt = self.t[5] - t
+            return ...
 
 
 def graph_chart(
