@@ -113,6 +113,13 @@ def s_shape_interplation(ox, oy, x, y, f):
     t4 = step4 * sampling_time
     t5 = step5 * sampling_time
 
+    pos1 = (Jmax * (t1 - t0) ** 3) / 6
+    pos2 = pos1 + Vcmd * (t2 - t1) - 0.5 * Jmax * (t2 ** 2 * (t2 - t1) - t2 *
+                                                   (t2 ** 2 - t1 ** 2) + (t2 ** 3 - t1 ** 3) / 3)
+    pos3 = pos2 + Vcmd * (t3 - t2)
+    pos4 = pos3 + Vcmd * (t4 - t3) - (Jmax * (t4 - t3) ** 3 / 6)
+    pos5 = pos4 + 0.5 * Jmax * (t5 ** 2 * (t5 - t4) - t5 * (t5 ** 2 - t4 ** 2) + ((t5 ** 3 - t4 ** 3) / 3))
+
     s_tmp = []
     v_tmp = []
     acc_tmp = []
@@ -124,46 +131,54 @@ def s_shape_interplation(ox, oy, x, y, f):
             jerk = Jmax
             acc = Jmax * (t - t0)
             fed = 0.5 * Jmax * (t - t0) ** 2
+            pos = (Jmax * (t-t0) ** 3)/6
         elif step1 <= j < step2:
             jerk = -Jmax
             acc = Jmax * (t2 - t)
             fed = Vcmd - 0.5 * Jmax * (t2 - t) ** 2
+            pos = pos1 + Vcmd * (t - t1) - 0.5 * Jmax * (
+                        t2 ** 2 * (t - t1) - t2 * (t ** 2 - t1 ** 2) + (t ** 3 - t1 ** 3) / 3)
         elif step2 <= j < step3:
             jerk = 0
             acc = 0
             fed = Vcmd
+            pos = pos2 + Vcmd * (t - t2)
         elif step3 <= j < step4:
             jerk = -Jmax
             acc = -Jmax * (t - t3)
             fed = Vcmd - 0.5 * Jmax * (t - t3) ** 2
+            pos = pos3 + Vcmd * (t - t3) - (Jmax * (t - t3) ** 3 / 6)
         elif j >= step4:
             jerk = Jmax
             acc = -Jmax * (t5 - t)
             fed = 0.5 * Jmax * (t5 - t) ** 2
+            pos = pos4 + 0.5 * Jmax * (t5 ** 2 * (t - t4) - t5 * (t ** 2 - t4 ** 2) + ((t ** 3 - t4 ** 3) / 3))
 
         else:
             raise ValueError
 
-        # s_tmp.append(pos)
+        s_tmp.append(pos)
         v_tmp.append(fed)
         acc_tmp.append(acc)
         jerk_tmp.append(jerk)
 
-    return v_tmp, acc_tmp, jerk_tmp
+    return s_tmp, v_tmp, acc_tmp, jerk_tmp
 
 
 if __name__ == '__main__':
     from nc import nc_reader
     with open("../line.nc") as textfile:
         text = textfile.read()
+    s_plot = []
     v_plot = []
     a_plot = []
     j_plot = []
     for ox, oy, x, y, of in nc_reader(text):
         # interpolation_2d(ox, oy, x, y, of)
-        v, a, j = s_shape_interplation(ox, oy, x, y, of)
+        s, v, a, j = s_shape_interplation(ox, oy, x, y, of)
+        s_plot.extend(s)
         v_plot.extend(v)
         a_plot.extend(a)
         j_plot.extend(j)
-    plt.plot(list(i * 0.001 for i in range(len(v_plot))), j_plot)
+    plt.plot(list(i * 0.001 for i in range(len(s_plot))), s_plot)
     plt.show()
