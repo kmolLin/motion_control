@@ -36,6 +36,7 @@ class NCEditor(QsciScintilla):
         self.setFont(self.font)
         self.setMarginsFont(self.font)
         self.setUtf8(True)
+        self.setEolMode(QsciScintilla.EolUnix)
 
         # Margin 0 is used for line numbers.
         font_metrics = QFontMetrics(self.font)
